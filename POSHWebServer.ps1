@@ -303,7 +303,7 @@ Function Check_iLO_Config($servers)
     $textsearch2 = "{'ilo_check': "
     $ilocheck = @()
     $basicAuth = "Basic" + " " + $base64AuthInfo
-    $url = "http://bmi-prod.optum.com/baseline/hpe/ilo"
+    $url = "https://my swagger API endpoint"
     $headers = @{
     "Content-Type"= "application/json"
     "Authorization"= "$basicAuth"
@@ -331,11 +331,11 @@ Function Check_iLO_Config($servers)
             try
                 {
                   $cmdILOBaselineCheck = Invoke-RestMethod -Method Post -Uri $url -Body $jsonBody -Headers $headers
-                  $cmd_serverinfo = Invoke-RestMethod -Uri ([URI]"http://bmi-prod.optum.com/serverinfo/$server")  -Method Get -UseDefaultCredentials -ErrorAction SilentlyContinue
+                  $cmd_serverinfo = Invoke-RestMethod -Uri ([URI]"my swagger API endpoint/$server")  -Method Get -UseDefaultCredentials -ErrorAction SilentlyContinue
                   IF($server -imatch '.com'){$hostname = $cmd_serverinfo.SERVERNAME}ELSE{$hostname = $cmd_serverinfo.SHORT_NAME}
                   $buildID = $cmdILOBaselineCheck.status
                   $logID = $buildID.split('/')[3]
-                  $logfileURL = "http://bmi-prod.optum.com/buildlog/$hostname" + "_" + $logID + ".log"
+                  $logfileURL = "https://hmy swagger API endpoint/$hostname" + "_" + $logID + ".log"
                   $timelimit = (Get-Date).AddMinutes(2)
                   Start-Sleep -Seconds 20
                   do {
@@ -423,7 +423,7 @@ Function Apply_iLO_Baseline($servers)
     $ilobaselineconfig = @()
     $logurls = @()
     $basicAuth = "Basic" + " " + $base64AuthInfo
-    $url = "http://bmi-stage.optum.com/baseline/hpe/ilo"
+    $url = "http://my swagger API endpoint"
     $headers = @{
     "Content-Type"= "application/json"
     "Authorization"= "$basicAuth"
@@ -447,7 +447,7 @@ Function Apply_iLO_Baseline($servers)
                   do{$buildID = $cmdILOBaselineCheck.status}
                   while ((-not $cmdILOBaselineCheck.status)  -and ($timelimit -gt (Get-Date)))
                   $logID = $buildID.split('/')[3]
-                  $logURL = "http://bmi-stage.optum.com/builds/events/$logID"
+                  $logURL = "http://my swagger API endpoint/$logID"
                   Start-Sleep -Seconds 30
                   $getLog = Invoke-RestMethod -Uri $logURL -Method Get -UseDefaultCredentials -ErrorAction Stop
                   $stat = $getLog.status | Select-Object -Last 1
@@ -479,7 +479,7 @@ Function Update_iLO_Firmware($servers)
     $ilofwupdate = @()
     $logurls = @()
     $basicAuth = "Basic" + " " + $base64AuthInfo
-    $url = "http://bmi-stage.optum.com/baseline/hpe/ilo"
+    $url = "http://my swagger API endpoint"
     $headers = @{
     "Content-Type"= "application/json"
     "Authorization"= "$basicAuth"
@@ -503,7 +503,7 @@ Function Update_iLO_Firmware($servers)
                       do{$buildID = $cmdILOBaselineCheck.status}
                       while ((-not $cmdILOBaselineCheck.status)  -and ($timelimit -gt (Get-Date)))
                       $logID = $buildID.split('/')[3]
-                      $logURL = "http://bmi-stage.optum.com/builds/events/$logID"
+                      $logURL = "http://my swagger API endpoint/$logID"
                       $timelimit = (Get-Date).AddMinutes(1)
                       do{
                       $getLog = Invoke-RestMethod -Uri $logURL -Method Get -UseDefaultCredentials -ErrorAction SilentlyContinue
@@ -542,7 +542,7 @@ Function Add_Server_to_OneView($servers)
                                           "password"= $PASS
                                          }
     $jsonBody = $body | ConvertTo-Json
-    $token_url = "https://hardwareautomation.optum.com/api/andromeda/login"
+    $token_url = "https://my swagger API endpoint"
     $getToken = Invoke-RestMethod -Uri $token_url -Method Post -Headers $headers -Body $jsonBody
     $tokenauth = $getToken.access_token
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -557,8 +557,8 @@ Function Add_Server_to_OneView($servers)
               { 
                 $response = $null
                 $err = $null
-                $response = Invoke-RestMethod -Uri ([URI]"https://hardwareautomation.optum.com/api/v1/oneview/addhost/$server") -Method Post -Headers $headers
-                $serverinfo = Invoke-RestMethod -Uri ([URI]"https://hardwareautomation.optum.com/api/v1/oneview/gethostdetails/$server") -Method Get -Headers $headers
+                $response = Invoke-RestMethod -Uri ([URI]"https://my swagger API endpoint/$server") -Method Post -Headers $headers
+                $serverinfo = Invoke-RestMethod -Uri ([URI]"https://my swagger API endpoint/$server") -Method Get -Headers $headers
                 IF(($response -imatch "success") -or ($response -imatch "Host is already in OneView, if you want to add, manually remove and clean first"))
                   {
                     $server = $serverinfo.name
@@ -634,7 +634,7 @@ Function Check_Dell_PSU_Settings($servers)
                                           "password"= $PASS
                                          }
                                 $jsonBody = $body | ConvertTo-Json
-                                $token_url = "https://hardwareautomation.optum.com/api/andromeda/login"
+                                $token_url = "https://my swagger API endpoint"
                                 $getToken = Invoke-RestMethod -Uri $token_url -Method Post -Headers $headers -Body $jsonBody
                                 $tokenauth = $getToken.access_token
                                 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -648,7 +648,7 @@ Function Check_Dell_PSU_Settings($servers)
                                     { 
                                      $response = $null
                                      $err = $null
-                                     $response = Invoke-RestMethod -Uri ([URI]"https://hardwareautomation.optum.com/api/v1/oob/check_dell_psu_settings/$server") -Method Get -Headers $headers
+                                     $response = Invoke-RestMethod -Uri ([URI]"https://my swagger API endpoint/$server") -Method Get -Headers $headers
                                      $list = "" | Select ServerName, Status, Power_Cap_Policy, Power_Redundancy, Power_Factor_Correction, PSRapid
                                      $list.ServerName = $server
                                      $list.Status = $response.status
@@ -693,7 +693,7 @@ Function Standardize_Dell_PSU($servers)
                                           "password"= "$PASS"
                                          }
                                 $jsonBody = $body | ConvertTo-Json
-                                $token_url = "https://hardwareautomation.optum.com/api/andromeda/login"
+                                $token_url = "https://my swagger API endpoint/login"
                                 $getToken = Invoke-RestMethod -Uri $token_url -Method Post -Headers $headers -Body $jsonBody
                                 $tokenauth = $getToken.access_token
                                 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -707,11 +707,11 @@ Function Standardize_Dell_PSU($servers)
                                     { 
                                      $response = $null
                                      $err = $null
-                                     $response = Invoke-RestMethod -Uri ([URI]"https://hardwareautomation.optum.com/api/v1/oob/configurepsudell/$server") -Method Post -Headers $headers
+                                     $response = Invoke-RestMethod -Uri ([URI]"https://my swagger API endpoint/$server") -Method Post -Headers $headers
                                      $list = "" | Select ServerName, Result, Status
                                      $list.ServerName = $server
                                      IF($response -ieq 'Success'){$list.Result = "Successfully updated PSU configuration"}
-                                     $response2 = Invoke-RestMethod -Uri ([URI]"https://hardwareautomation.optum.com/api/v1/oob/check_dell_psu_settings/$server") -Method Get -Headers $headers
+                                     $response2 = Invoke-RestMethod -Uri ([URI]"https://my swagger API endpoint/$server") -Method Get -Headers $headers
                                      $list.Status = $response2.status
                                      $dell_psu_configure += $list
                                     } 
@@ -731,7 +731,7 @@ Function Standardize_Dell_PSU($servers)
 
 Function Get_IDRAC_Firmware($servers)
 {
-  $idrac_user = "ehs_vms@ms.ds.uhc.com"
+  $idrac_user = "Admin_User"
   $PASS = $CREDENTIALS.GetNetworkCredential().Password
   $base64AuthInfo = [System.Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("${idrac_user}:${PASS}")))
   $dell_idrac_firmware = @()
@@ -831,7 +831,7 @@ Function Check_iDRAC_Config($servers)
     $textsearch = "{'idrac_check': "
     $ilocheck = @()
     $basicAuth = "Basic" + " " + $base64AuthInfo
-    $url = "https://bmi-prod.optum.com/baseline/dell/idrac"
+    $url = "https://my swagger API endpoint"
     $headers = @{
     "Content-Type"= "application/json"
     "Authorization"= "$basicAuth"
@@ -856,7 +856,7 @@ Function Check_iDRAC_Config($servers)
             try
                 {
                   $cmdILOBaselineCheck = Invoke-RestMethod -Method Post -Uri $url -Body $jsonBody -Headers $headers
-                  $cmd_serverinfo = Invoke-RestMethod -Uri ([URI]"http://bmi-prod.optum.com/serverinfo/$server")  -Method Get -UseDefaultCredentials -ErrorAction SilentlyContinue
+                  $cmd_serverinfo = Invoke-RestMethod -Uri ([URI]"http://my swagger API endpoint/$server")  -Method Get -UseDefaultCredentials -ErrorAction SilentlyContinue
                   IF($server -imatch '.com'){$hostname = $cmd_serverinfo.SERVERNAME}ELSE{$hostname = $cmd_serverinfo.SHORT_NAME}
                   $buildID = $cmdILOBaselineCheck.status
                   $logID = $buildID.split('/')[3]
@@ -933,7 +933,7 @@ Function Check_iDRAC_Config($servers)
 
 Function Check_DELL_Memory($servers)
 {
-  $idrac_user = "ehs_vms@ms.ds.uhc.com"
+  $idrac_user = "Admin_user"
   $PASS = $CREDENTIALS.GetNetworkCredential().Password
   $base64AuthInfo = [System.Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("${idrac_user}:${PASS}")))
   $dell_idrac_firmware = @()
